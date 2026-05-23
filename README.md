@@ -21,8 +21,6 @@ Agent instructions: [`AGENTS.md`](AGENTS.md)
 
 Zero-shot and ViT latency measured on RTX 3090. PEFT and full FT latency approximate zero-shot (same SAM2 encoder; PEFT adapters add <0.5% compute).
 
-![Final comparison chart](viz/phase5_final_comparison.png)
-
 ---
 
 ## Dataset
