@@ -44,6 +44,13 @@ The project plan's stronger goal of recovering more than 90% of full fine-tune m
 - Prefer Colab/A100 execution for heavy SAM2 training work, as stated in the plan.
 - Local code should be lightweight, reproducible, and suitable for packaging into Colab workflows.
 
+## Planning And Parallelization
+
+- When planning next steps, analyze the workflow for independent tasks that can run in parallel.
+- If spawning multiple agents can perform those independent tasks in parallel and save a meaningful amount of time, proactively recommend delegating those tasks to multiple agents.
+- Each delegation recommendation must include the detailed analysis behind it: the tasks that can run independently, what each agent would own, expected time saved, coordination risks, and why parallelization is or is not worthwhile.
+- Do not recommend parallel agents for trivial, tightly coupled, or low-benefit work where coordination overhead outweighs the likely time savings.
+
 ## Engineering Constraints
 
 - Keep changes minimal and directly tied to the current phase.
@@ -94,4 +101,4 @@ At the start of each coding session:
 
 ## Current Project Status
 
-Phase 0 has a T4 smoke-test artifact, but the official A100 target-environment check is still pending. Phase 1 dataset construction is in progress. The repository contains dataset validation, visualization, dataloader, metric, and adapter identity-check utilities, but Phase 1 cannot pass until real COCO segmentation data is exported into `dataset/`.
+Phase 0 has a T4 smoke-test artifact, but the official A100 target-environment check is still pending. Phase 1 now has a four-class COCO segmentation dataset in `dataset/` with `arm`, `leg`, `torso`, and `head`; validation, visualization, and dataloader smoke checks pass. Phase 2 zero-shot SAM2 evaluation tooling exists and has passed a one-image local MPS smoke test, but official full-test metrics should be generated on Colab/A100. The ViT baseline remains blocked until the original ViT model code/checkpoint is available.

@@ -8,3 +8,10 @@ __pycache__/
 
 .ipynb_checkpoints/
 
+dataset/images/
+dataset/annotations/*.json
+dataset/raw
+
+outputs/
+segmentation-dataset.coco-segmentation
+viz

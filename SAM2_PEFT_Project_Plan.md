@@ -135,7 +135,7 @@ All three problems pass. You have a running environment. Estimated time: **2–3
 
 ### Target spec
 - 350–500 images total
-- Classes: `arm`, `leg`, `torso`, `joint`, `camera_sensor`, `gripper` (use what's available — minimum 3 classes)
+- Classes: `arm`, `leg`, `torso`, `head` (use what's available — minimum 3 classes)
 - Format: COCO JSON with segmentation polygon masks
 - Split: 70% train / 15% val / 15% test
 
@@ -180,9 +180,7 @@ CLASS_COLOURS = {
     "arm":           [255, 80,  80],
     "leg":           [80,  160, 255],
     "torso":         [80,  220, 120],
-    "joint":         [255, 200, 50],
-    "camera_sensor": [200, 80,  255],
-    "gripper":       [255, 140, 50],
+    "head":          [255, 200, 50],
 }
 
 fig, axes = plt.subplots(2, 5, figsize=(20, 8))
@@ -209,7 +207,7 @@ for col, img_id in enumerate(img_ids):
     axes[1, col].axis("off")
 
 legend_patches = [mpatches.Patch(color=[c/255 for c in v], label=k) for k, v in CLASS_COLOURS.items()]
-fig.legend(handles=legend_patches, loc="lower center", ncol=6, fontsize=9)
+fig.legend(handles=legend_patches, loc="lower center", ncol=4, fontsize=9)
 plt.suptitle("Phase 1 — GT mask alignment check (top: raw, bottom: masked)", fontsize=11)
 plt.tight_layout()
 plt.savefig("viz/phase1_mask_alignment.png", dpi=150, bbox_inches="tight")
@@ -368,7 +366,7 @@ plt.tight_layout()
 plt.savefig("viz/phase2_iou_distribution.png", dpi=150, bbox_inches="tight")
 plt.show()
 ```
-After looking at the worst 10, write 2–3 sentences in a markdown comment in your notebook about the failure pattern (e.g. "metallic reflections cause boundary confusion", "occluded joints get merged with torso").
+After looking at the worst 10, write 2–3 sentences in a markdown comment in your notebook about the failure pattern (e.g. "metallic reflections cause boundary confusion", "occluded heads get merged with torso").
 
 ✅ Pass: failure grid is saved, IoU distribution plotted, failure pattern written in words. These two observations directly inform your augmentation choices in Phase 3.
 
@@ -718,7 +716,7 @@ plt.tight_layout()
 plt.savefig("viz/phase4_qualitative_grid.png", dpi=150, bbox_inches="tight")
 plt.show()
 ```
-✅ Pass: predicted masks (red) substantially overlap with GT masks (green) in at least 4 out of 5 rows. You should be able to look at each pair and say "yes, that's a plausible segmentation of a robot arm / leg / joint."
+✅ Pass: predicted masks (red) substantially overlap with GT masks (green) in at least 4 out of 5 rows. You should be able to look at each pair and say "yes, that's a plausible segmentation of a robot arm / leg / head."
 
 ### Phase 4 pass threshold
 Test mIoU number in hand, training curves plotted, per-class breakdown documented. Estimated time: **2–3 days**

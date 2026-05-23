@@ -8,9 +8,11 @@ The execution source of truth is [`SAM2_PEFT_Project_Plan.md`](SAM2_PEFT_Project
 
 - Phase 0 T4 smoke test has run.
 - Official A100 Phase 0 target-environment check is pending.
-- Phase 1 dataset construction is in progress.
+- Phase 1 dataset construction is complete for the four-class dataset: `arm`, `leg`, `torso`, `head`.
 - Dataset-independent utilities for COCO loading, mIoU, and adapter identity checks are present.
-- No phase is complete yet.
+- Phase 2 zero-shot SAM2 evaluation script is present and has passed a one-image local MPS smoke test.
+- Full Phase 2 zero-shot evaluation should be run on Colab/A100 for official numbers.
+- ViT baseline evaluation is blocked until the original ViT model code/checkpoint is provided.
 - Heavy SAM2 training and validation are expected to run on Google Colab Pro with an A100 GPU.
 
 ## Completion Contract
@@ -65,6 +67,7 @@ dataset/
 After exporting COCO segmentation data, run:
 
 ```bash
+python scripts/import_roboflow_coco.py --source path/to/roboflow-export.zip
 python scripts/validate_coco_dataset.py
 python scripts/visualize_phase1_dataset.py
 python scripts/smoke_test_dataloader.py
@@ -74,6 +77,37 @@ Phase 1 passes only when the structure checks pass and the visualizations are sa
 
 - `viz/phase1_mask_alignment.png`
 - `viz/phase1_class_balance.png`
+
+Current split:
+
+```text
+train: 280 images
+val:    60 images
+test:   58 images
+```
+
+## Phase 2
+
+Run the zero-shot SAM2 baseline on the held-out test split:
+
+```bash
+python scripts/evaluate_zero_shot_sam2.py
+```
+
+For a quick smoke test, limit the run:
+
+```bash
+python scripts/evaluate_zero_shot_sam2.py --max-images 2
+```
+
+Outputs:
+
+- `outputs/phase2_zero_shot_sam2/results.csv`
+- `outputs/phase2_zero_shot_sam2/summary.json`
+- `viz/phase2_failure_modes.png`
+- `viz/phase2_iou_distribution.png`
+
+The local Mac can smoke-test this script with MPS, but official Phase 2 metrics should be generated on the Colab/A100 environment used for the rest of the SAM2 experiments.
 
 ## Local Checks Without Dataset
 
