@@ -7,16 +7,14 @@ Phase 1 builds the dataset required by `SAM2_PEFT_Project_Plan.md`.
 - 350-500 total humanoid robot images.
 - COCO instance segmentation format with polygon masks.
 - Split: 70% train, 15% val, 15% test.
-- Minimum 3 usable component classes.
-- Target classes:
+- Exactly 4 foreground robot-part classes:
   - `arm`
   - `leg`
   - `torso`
-  - `joint`
-  - `camera_sensor`
-  - `gripper`
+  - `head`
+- Semantic label `0` is background and is not counted as a project class.
 
-If one of the target classes is too rare to annotate consistently, document it before merging or dropping it.
+If one of the target classes is too rare to annotate consistently, collect or annotate more examples before training rather than silently dropping the class.
 
 ## Directory Layout
 
@@ -38,18 +36,46 @@ Each COCO JSON must reference images by filename only, not absolute local paths.
 
 ## Recommended Build Path
 
-1. Collect candidate humanoid robot images.
-2. Remove duplicates, near-duplicates, tiny images, blurry images, and images where components are not visible.
-3. Annotate segmentation polygons for visible robot components.
-4. Export to COCO segmentation format.
-5. Put images and JSON files into the directory layout above.
-6. Run:
+1. Search Roboflow Universe for instance-segmentation projects with robot-part labels. Prefer datasets with a clear open license and polygon masks, not bounding boxes.
+2. Candidate sources to inspect first:
+   - [`so101-segmentation-v4`](https://universe.roboflow.com/adityas-workspace-kukhm/so101-segmentation-v4) / [`so101-segementation-v3`](https://universe.roboflow.com/adityas-workspace-kukhm/so101-segementation-v3): useful robot-arm labels. These are small and may need to be combined with manual annotation.
+   - [`Components`](https://universe.roboflow.com/robot-pose-annotation/components-zx3kz) by Robot Pose Annotation: large CC BY 4.0 instance-segmentation dataset with component labels. It is not humanoid-specific, so use only if the visual content is acceptable after spot-checking.
+   - `AGV_kami`: larger instance-segmentation source with component labels. Use only if the images match the project scope closely enough after visual inspection.
+   - Additional Roboflow searches: `class:"robot arm" instance segmentation`, `humanoid robot head segmentation`, `humanoid robot segmentation`.
+3. Download the chosen project version as COCO segmentation. Do not download YOLO/object-detection exports for Phase 1.
+4. Import the downloaded zip or extracted folder:
+
+```bash
+python scripts/import_roboflow_coco.py --source path/to/roboflow-export.zip
+```
+
+Add explicit label mappings when a source uses custom names:
+
+```bash
+python scripts/import_roboflow_coco.py \
+  --source path/to/roboflow-export.zip \
+  --class-map so101_upperarm=arm \
+  --class-map robot_head=head
+```
+
+5. Remove duplicates, near-duplicates, tiny images, blurry images, and images where components are not visible.
+6. Manually annotate the missing classes if the imported dataset has fewer than 350 images, does not contain all four foreground classes, or has poor class balance.
+7. Run:
 
 ```bash
 python scripts/validate_coco_dataset.py
 python scripts/visualize_phase1_dataset.py
 python scripts/smoke_test_dataloader.py
 ```
+
+The importer normalizes common robot-arm labels into the project classes and writes:
+
+```text
+dataset/images/{train,val,test}/
+dataset/annotations/{train,val,test}.json
+```
+
+It does not prove Phase 1 is complete. The validation and visualization checks above are still mandatory.
 
 ## Annotation Rules
 
@@ -61,13 +87,17 @@ python scripts/smoke_test_dataloader.py
 - Background is not a COCO category.
 - Avoid bounding-box-only exports; every annotation must include `segmentation`.
 
+## AI-Assisted Labeling
+
+Use Roboflow Smart Polygon, SAM-assisted labeling, or Auto Label to accelerate annotation, but still review masks before accepting them as training ground truth. In particular, check that `arm`, `leg`, `torso`, and `head` are separated consistently, because automatic masks often find object boundaries without knowing the project-specific part taxonomy.
+
 ## Phase 1 Pass Checks
 
 Phase 1 is not complete until:
 
 - `dataset/annotations/train.json` has at least 280 images.
 - All annotations include segmentation masks.
-- At least 3 categories are present.
+- Exactly four foreground categories are present: `arm`, `leg`, `torso`, `head`.
 - `viz/phase1_mask_alignment.png` shows masks aligned correctly in at least 4 out of 5 validation images.
 - `viz/phase1_class_balance.png` shows no class above 60% of all annotations.
 - A dataloader smoke test can load a batch without errors.

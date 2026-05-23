@@ -8,6 +8,7 @@ from pathlib import Path
 
 REQUIRED_SPLITS = ("train", "val", "test")
 REQUIRED_KEYS = ("images", "annotations", "categories")
+TARGET_CLASSES = ("arm", "leg", "torso", "head")
 
 
 def load_json(path: Path) -> dict:
@@ -36,9 +37,14 @@ def validate_split(dataset_root: Path, split: str) -> tuple[bool, Counter]:
     images = coco.get("images", [])
     annotations = coco.get("annotations", [])
     categories = coco.get("categories", [])
+    category_names = [cat.get("name") for cat in categories]
     category_ids = {cat["id"] for cat in categories if "id" in cat}
     image_ids = {img["id"] for img in images if "id" in img}
     image_names = [img.get("file_name") for img in images]
+
+    if sorted(category_names) != sorted(TARGET_CLASSES):
+        print(f"FAIL {split}: expected exactly foreground classes {list(TARGET_CLASSES)}, found {category_names}")
+        ok = False
 
     missing_files = [
         name for name in image_names
@@ -79,7 +85,7 @@ def validate_split(dataset_root: Path, split: str) -> tuple[bool, Counter]:
         ok = False
 
     print(f"{split}: images={len(images)} annotations={len(annotations)} categories={len(categories)}")
-    print(f"{split}: categories={[cat.get('name') for cat in categories]}")
+    print(f"{split}: foreground categories={category_names}")
     return ok, category_counts
 
 
@@ -125,4 +131,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

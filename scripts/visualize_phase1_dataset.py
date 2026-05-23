@@ -16,9 +16,7 @@ CLASS_COLORS = {
     "arm": [255, 80, 80],
     "leg": [80, 160, 255],
     "torso": [80, 220, 120],
-    "joint": [255, 200, 50],
-    "camera_sensor": [200, 80, 255],
-    "gripper": [255, 140, 50],
+    "head": [255, 200, 50],
 }
 
 
@@ -62,7 +60,7 @@ def save_alignment_grid(dataset_root: Path, output_dir: Path, seed: int) -> None
         mpatches.Patch(color=[c / 255 for c in color], label=name)
         for name, color in CLASS_COLORS.items()
     ]
-    fig.legend(handles=legend_patches, loc="lower center", ncol=6, fontsize=9)
+    fig.legend(handles=legend_patches, loc="lower center", ncol=4, fontsize=9)
     plt.suptitle("Phase 1 - GT mask alignment check (top: raw, bottom: masked)", fontsize=11)
     plt.tight_layout()
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -127,4 +125,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

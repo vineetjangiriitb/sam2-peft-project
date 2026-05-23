@@ -41,8 +41,20 @@ The project plan's stronger goal of recovering more than 90% of full fine-tune m
 - Keep experiment metrics reproducible. Record commands, configs, seeds where practical, checkpoint paths, and raw result files.
 - Use the same test split and mIoU implementation across all benchmark methods.
 - Do not compare methods using different datasets, prompts, preprocessing, or evaluation code unless the difference is explicitly documented and justified.
-- Prefer Colab/A100 execution for heavy SAM2 training work, as stated in the plan.
-- Local code should be lightweight, reproducible, and suitable for packaging into Colab workflows.
+- Prefer RunPod GPU execution over Colab for heavy SAM2 training and evaluation work.
+- The active target compute is RunPod via SSH, using the RunPod PyTorch 2.4.0 template with CUDA 12.4.1, Ubuntu 22.04, Python 3.11, and either RTX 3090 24GB VRAM or RTX 4090-class GPUs.
+- Do not assume notebook-driven execution. Build and document command-line workflows that can run over SSH on the RunPod pod.
+- Use `tmux` for long-running RunPod training or evaluation sessions so jobs survive SSH disconnects.
+- Because the current pod has no persistent volume, sync outputs, checkpoints, logs, generated visualizations, and updated notes back to the local Mac after each training or evaluation run and before stopping the pod.
+- Local code should be lightweight, reproducible, and suitable for packaging into RunPod SSH workflows.
+- Treat the project taxonomy as exactly four foreground robot-part classes: `arm`, `leg`, `torso`, and `head`. Label `0` is background and must not be described as a fifth project class.
+
+## Planning And Parallelization
+
+- When planning next steps, analyze the workflow for independent tasks that can run in parallel.
+- If spawning multiple agents can perform those independent tasks in parallel and save a meaningful amount of time, proactively recommend delegating those tasks to multiple agents.
+- Each delegation recommendation must include the detailed analysis behind it: the tasks that can run independently, what each agent would own, expected time saved, coordination risks, and why parallelization is or is not worthwhile.
+- Do not recommend parallel agents for trivial, tightly coupled, or low-benefit work where coordination overhead outweighs the likely time savings.
 
 ## Engineering Constraints
 
@@ -94,4 +106,4 @@ At the start of each coding session:
 
 ## Current Project Status
 
-Phase 0 has a T4 smoke-test artifact, but the official A100 target-environment check is still pending. Phase 1 dataset construction is in progress. The repository contains dataset validation, visualization, dataloader, metric, and adapter identity-check utilities, but Phase 1 cannot pass until real COCO segmentation data is exported into `dataset/`.
+Phase 0 has a T4 smoke-test artifact, but the official target-environment check now needs to be rerun on RunPod RTX 3090/4090 over SSH. Phase 1 now has a four-class COCO segmentation dataset in `dataset/` with foreground classes `arm`, `leg`, `torso`, and `head`; validation, visualization, and dataloader smoke checks pass. Phase 2 zero-shot SAM2 evaluation tooling exists and has passed a one-image local MPS smoke test, but official full-test metrics should be generated on the RunPod GPU environment. The ViT baseline remains blocked until the original ViT model code/checkpoint is available. `IMPLEMENTATION.md` must be kept updated with what worked, what failed, and workflow changes as phases progress.

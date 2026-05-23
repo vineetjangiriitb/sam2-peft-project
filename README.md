@@ -2,16 +2,17 @@
 
 This project adapts SAM2 for humanoid robot component segmentation using parameter-efficient fine-tuning under severe annotation scarcity.
 
-The execution source of truth is [`SAM2_PEFT_Project_Plan.md`](SAM2_PEFT_Project_Plan.md). AI coding agents must also follow [`AGENTS.md`](AGENTS.md).
+The execution source of truth is [`SAM2_PEFT_Project_Plan.md`](SAM2_PEFT_Project_Plan.md). AI coding agents must also follow [`AGENTS.md`](AGENTS.md). Implementation history and experiment notes are tracked in [`IMPLEMENTATION.md`](IMPLEMENTATION.md).
 
 ## Current Status
 
-- Phase 0 T4 smoke test has run.
-- Official A100 Phase 0 target-environment check is pending.
-- Phase 1 dataset construction is in progress.
+- Phase 0 T4 smoke test has run as a legacy smoke artifact.
+- Official Phase 0 target-environment check is pending on RunPod RTX 3090/4090 over SSH.
+- Phase 1 dataset construction is complete for the four-class dataset: `arm`, `leg`, `torso`, `head`.
 - Dataset-independent utilities for COCO loading, mIoU, and adapter identity checks are present.
-- No phase is complete yet.
-- Heavy SAM2 training and validation are expected to run on Google Colab Pro with an A100 GPU.
+- Phase 2 complete: zero-shot SAM2 (21.78% mIoU) and ViT-B/16 supervised baseline (42.23% mIoU) both evaluated on the 58-image test split on RunPod RTX 3090.
+- Heavy SAM2 training and validation are expected to run on RunPod over SSH using the PyTorch 2.4.0 CUDA 12.4.1 template with an RTX 3090 24GB VRAM or RTX 4090-class GPU.
+- The foreground class taxonomy is exactly four robot-part classes: `arm`, `leg`, `torso`, and `head`. Semantic label `0` is background and is not counted as a fifth project class.
 
 ## Completion Contract
 
@@ -19,8 +20,8 @@ The project is complete only after the four-way benchmark is finished and docume
 
 | Method | Test mIoU | Params Trained | Latency | Status |
 |---|---:|---:|---:|---|
-| Zero-shot SAM2 | TBD | 0 | TBD | Not run |
-| ViT baseline | TBD | TBD | TBD | Not run |
+| Zero-shot SAM2 | 21.78% | 0 | 236.8 ms mean / 499.0 ms p95 | RunPod complete |
+| ViT baseline | 42.23% | 89.6M (full) | 19.4 ms mean / 67.8 ms p95 | RunPod complete |
 | SAM2 PEFT | TBD | <2% of SAM2 | TBD | Not run |
 | Full SAM2 fine-tune | TBD | ~100% of SAM2 | TBD | Not run |
 
@@ -35,14 +36,31 @@ Required final evidence:
 
 ## Phase 0
 
-Open `notebooks/phase0_sam2_sanity_check.ipynb` in Colab and run Problems 0.1-0.3.
+Run Problems 0.1-0.3 on the RunPod pod through SSH. The existing notebook remains a legacy smoke-test artifact, but official runs should be command-line reproducible.
 
 Phase 0 passes only when:
 
 - SAM2 imports successfully.
-- Colab reports an A100 GPU.
+- `nvidia-smi` reports an RTX 3090/4090-class GPU.
 - Single-image SAM2 inference creates `viz/phase0_inference_check.png`.
 - Model memory leaves enough VRAM headroom for training.
+
+## RunPod Workflow
+
+Official GPU commands should run over SSH on the RunPod pod:
+
+```bash
+ssh <runpod-user>@<runpod-host>
+python --version
+nvidia-smi
+tmux new -s sam2
+git clone <repo-url>
+cd sam2-peft-project
+pip install -r requirements.txt
+pip install git+https://github.com/facebookresearch/sam2.git
+```
+
+Run long training and evaluation commands inside `tmux` so they survive SSH disconnects. The current pod has only temporary container storage. After each run, sync important checkpoints, logs, `outputs/`, `viz/`, and updated notes back to the local Mac before stopping the pod.
 
 ## Phase 1
 
@@ -65,6 +83,7 @@ dataset/
 After exporting COCO segmentation data, run:
 
 ```bash
+python scripts/import_roboflow_coco.py --source path/to/roboflow-export.zip
 python scripts/validate_coco_dataset.py
 python scripts/visualize_phase1_dataset.py
 python scripts/smoke_test_dataloader.py
@@ -74,6 +93,52 @@ Phase 1 passes only when the structure checks pass and the visualizations are sa
 
 - `viz/phase1_mask_alignment.png`
 - `viz/phase1_class_balance.png`
+
+Current split:
+
+```text
+train: 280 images
+val:    60 images
+test:   58 images
+```
+
+## Phase 2
+
+Run the zero-shot SAM2 baseline on the held-out test split:
+
+```bash
+python scripts/evaluate_zero_shot_sam2.py
+```
+
+For a quick smoke test, limit the run:
+
+```bash
+python scripts/evaluate_zero_shot_sam2.py --max-images 2
+```
+
+Outputs:
+
+- `outputs/phase2_zero_shot_sam2/results.csv`
+- `outputs/phase2_zero_shot_sam2/summary.json`
+- `viz/phase2_failure_modes.png`
+- `viz/phase2_iou_distribution.png`
+
+The local Mac can smoke-test this script with MPS, but official Phase 2 metrics should be generated on the RunPod GPU environment used for the rest of the SAM2 experiments.
+
+Official RunPod zero-shot result:
+
+```text
+Test images: 58
+Annotations: 333
+Mean mIoU: 0.2178
+Mean latency: 236.8 ms/image
+P95 latency: 499.0 ms/image
+Per-class IoU:
+  arm:   0.1447
+  leg:   0.1920
+  torso: 0.3241
+  head:  0.2255
+```
 
 ## Local Checks Without Dataset
 

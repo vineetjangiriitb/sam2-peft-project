@@ -2,8 +2,10 @@
 
 > **Goal:** Adapt SAM2 to robot component segmentation using parameter-efficient fine-tuning (PEFT adapters + mask decoder fine-tune), compare against full fine-tune and zero-shot baselines, and demonstrate that <2% parameter update recovers >90% of full fine-tune mIoU.
 >
-> **Compute:** Google Colab Pro (A100)
-> **Dataset target:** 300–500 images of humanoid robot components with segmentation masks
+> **Compute:** RunPod GPU pod over SSH. Current target: RunPod PyTorch 2.4.0 template, CUDA 12.4.1, Ubuntu 22.04, Python 3.11, 1x RTX 3090 24GB VRAM or RTX 4090-class GPU.
+> **Dataset target:** 350–500 images of humanoid robot components with segmentation masks
+
+> **Class taxonomy:** exactly four foreground classes: `arm`, `leg`, `torso`, and `head`. Label `0` is background for semantic masks and metrics implementation, not a fifth project class.
 
 ---
 
@@ -15,6 +17,8 @@ Each phase has:
 - **Pass threshold** — the number that tells you "this phase is done, move forward"
 
 If you fail a check, you stay in that phase and debug. If you pass, you move to the next phase. Treat every check like a problem set — the output is your signal.
+
+Update `IMPLEMENTATION.md` after every completed check, failed run, infrastructure change, or important debugging decision. The README should summarize the latest stable status, while `IMPLEMENTATION.md` should preserve the detailed implementation history.
 
 ### Visualisation outputs
 
@@ -45,15 +49,31 @@ By the end of the project, `viz/` will contain:
 
 ## Phase 0 — Environment & Sanity Check
 
-**What you build:** A working Colab notebook that can run SAM2 inference on a single image.
+**What you build:** A working RunPod SSH environment that can run SAM2 inference on a single image from the command line.
 
 ### Setup steps
 ```bash
+ssh <runpod-user>@<runpod-host>
+python --version
+nvidia-smi
 pip install sam2 supervision pycocotools
 
-# Download SAM2.1 large checkpoint
+# Download SAM2.1 large checkpoint if the workflow needs a local file.
 wget https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_large.pt
 ```
+
+RunPod pod assumptions for official runs:
+
+- Template: RunPod PyTorch 2.4.0
+- CUDA: 12.4.1
+- OS: Ubuntu 22.04
+- Python: 3.11
+- GPU: RTX 3090 24GB VRAM or RTX 4090-class GPU
+- Container disk: 20GB temporary disk, erased when the pod is stopped
+- Volume disk/network volume: none unless explicitly added later
+- Interface: SSH-first command-line execution; Jupyter is optional, not the primary workflow
+- Use `tmux` for long-running training and evaluation commands.
+- Because the disk is temporary, sync checkpoints, raw metrics, logs, updated notes, and final figures back to the local Mac after each run and before stopping the pod.
 
 ### Chapter problems
 
@@ -63,13 +83,13 @@ import torch
 from sam2.build_sam import build_sam2
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 
-print(torch.cuda.get_device_name(0))   # should print A100
+print(torch.cuda.get_device_name(0))   # should print RTX 3090, RTX 4090, or equivalent target GPU
 print(torch.cuda.memory_allocated() / 1e9)  # should be near 0
 ```
-✅ Pass: prints "A100" with no import errors
+✅ Pass: prints an RTX 3090/4090-class GPU with no import errors
 
 **Problem 0.2 — Single image inference + visualisation**
-Download any robot image from the web. Run SAM2 with a point prompt at the centre of the image.
+Copy or download any robot image into the RunPod working directory. Run SAM2 with a point prompt at the centre of the image.
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
@@ -120,9 +140,9 @@ print(f"Mask coverage: {masks[0].sum() / (h*w) * 100:.1f}% of image")
 ```python
 # After loading model
 print(f"Model memory: {torch.cuda.memory_allocated()/1e9:.2f} GB")
-# Should be < 10 GB, leaving headroom for training
+# Should leave enough headroom for 24GB-VRAM training/evaluation runs.
 ```
-✅ Pass: model fits with >10 GB VRAM remaining
+✅ Pass: model fits with enough VRAM remaining to run the next planned smoke test. If a 24GB GPU is tight, reduce batch size, image count per smoke run, or gradient accumulation before changing the project goal.
 
 ### Phase 0 pass threshold
 All three problems pass. You have a running environment. Estimated time: **2–3 hours**
@@ -135,7 +155,8 @@ All three problems pass. You have a running environment. Estimated time: **2–3
 
 ### Target spec
 - 350–500 images total
-- Classes: `arm`, `leg`, `torso`, `joint`, `camera_sensor`, `gripper` (use what's available — minimum 3 classes)
+- Foreground classes: `arm`, `leg`, `torso`, `head`
+- Background: semantic label `0`, used internally but not counted as a project class
 - Format: COCO JSON with segmentation polygon masks
 - Split: 70% train / 15% val / 15% test
 
@@ -161,7 +182,7 @@ print("Categories:", [c["name"] for c in coco["categories"]])
 has_seg = all("segmentation" in a for a in coco["annotations"])
 print("All have segmentation masks:", has_seg)
 ```
-✅ Pass: ≥280 train images, `has_seg = True`, ≥3 categories
+✅ Pass: ≥280 train images, `has_seg = True`, and exactly four foreground categories: `arm`, `leg`, `torso`, `head`
 
 **Problem 1.2 — Mask visualisation spot check**
 Randomly pick 5 images from val set and overlay their GT masks. Each class gets a distinct colour.
@@ -180,9 +201,7 @@ CLASS_COLOURS = {
     "arm":           [255, 80,  80],
     "leg":           [80,  160, 255],
     "torso":         [80,  220, 120],
-    "joint":         [255, 200, 50],
-    "camera_sensor": [200, 80,  255],
-    "gripper":       [255, 140, 50],
+    "head":          [255, 200, 50],
 }
 
 fig, axes = plt.subplots(2, 5, figsize=(20, 8))
@@ -209,7 +228,7 @@ for col, img_id in enumerate(img_ids):
     axes[1, col].axis("off")
 
 legend_patches = [mpatches.Patch(color=[c/255 for c in v], label=k) for k, v in CLASS_COLOURS.items()]
-fig.legend(handles=legend_patches, loc="lower center", ncol=6, fontsize=9)
+fig.legend(handles=legend_patches, loc="lower center", ncol=4, fontsize=9)
 plt.suptitle("Phase 1 — GT mask alignment check (top: raw, bottom: masked)", fontsize=11)
 plt.tight_layout()
 plt.savefig("viz/phase1_mask_alignment.png", dpi=150, bbox_inches="tight")
@@ -368,7 +387,7 @@ plt.tight_layout()
 plt.savefig("viz/phase2_iou_distribution.png", dpi=150, bbox_inches="tight")
 plt.show()
 ```
-After looking at the worst 10, write 2–3 sentences in a markdown comment in your notebook about the failure pattern (e.g. "metallic reflections cause boundary confusion", "occluded joints get merged with torso").
+After looking at the worst 10, write 2–3 sentences in `IMPLEMENTATION.md` about the failure pattern (e.g. "metallic reflections cause boundary confusion", "occluded heads get merged with torso").
 
 ✅ Pass: failure grid is saved, IoU distribution plotted, failure pattern written in words. These two observations directly inform your augmentation choices in Phase 3.
 
@@ -489,12 +508,12 @@ Run 1 full training epoch. Check:
 ```python
 # Loss should decrease from step 1 to step N within the epoch
 # No NaN values
-# GPU memory stays under 35 GB
+# GPU memory stays within the 24GB RunPod target
 assert not torch.isnan(loss), "NaN loss detected"
 print(f"Epoch 1 loss: {epoch_loss:.4f}")
 print(f"GPU memory:   {torch.cuda.max_memory_allocated()/1e9:.1f} GB")
 ```
-✅ Pass: no NaN, loss is a real number, memory ≤ 35 GB
+✅ Pass: no NaN, loss is a real number, and memory fits on the active RTX 3090/4090 pod. If memory exceeds the pod limit, first lower batch size or use gradient accumulation while keeping the same dataset, metrics, and model comparison protocol.
 
 **Problem 3.5 — Overfitting probe with loss curve**
 Train for 5 epochs on just 20 images (intentional overfit). Plot the loss curve and visually verify predictions on those same 20 images.
@@ -718,7 +737,7 @@ plt.tight_layout()
 plt.savefig("viz/phase4_qualitative_grid.png", dpi=150, bbox_inches="tight")
 plt.show()
 ```
-✅ Pass: predicted masks (red) substantially overlap with GT masks (green) in at least 4 out of 5 rows. You should be able to look at each pair and say "yes, that's a plausible segmentation of a robot arm / leg / joint."
+✅ Pass: predicted masks (red) substantially overlap with GT masks (green) in at least 4 out of 5 rows. You should be able to look at each pair and say "yes, that's a plausible segmentation of a robot arm / leg / head."
 
 ### Phase 4 pass threshold
 Test mIoU number in hand, training curves plotted, per-class breakdown documented. Estimated time: **2–3 days**
@@ -906,7 +925,7 @@ Table complete, resume bullet written, README done. Estimated time: **1–2 days
 
 | Phase | Deliverable | Key metric | Estimated time |
 |---|---|---|---|
-| 0 | Working Colab environment | SAM2 runs on one image | 2–3 hours |
+| 0 | Working RunPod SSH environment | SAM2 runs on one image | 2–3 hours |
 | 1 | COCO dataset, annotated | ≥280 train images, masks correct | 3–5 days |
 | 2 | Baseline numbers | Zero-shot mIoU + ViT mIoU recorded | 1–2 days |
 | 3 | Adapter implementation | ≤2% params trainable, overfit probe passes | 3–5 days |
@@ -922,7 +941,7 @@ Table complete, resume bullet written, README done. Estimated time: **1–2 days
 
 When you open this file in Claude Code, each phase maps to a conversation. Suggested prompts:
 
-- **Phase 0:** `"Help me set up the Colab environment for SAM2 and run Problem 0.1–0.3"`
+- **Phase 0:** `"Help me set up the RunPod SSH environment for SAM2 and run Problem 0.1–0.3"`
 - **Phase 1:** `"I have images from Roboflow. Help me write the DataLoader for COCO-format segmentation masks and run Problem 1.4"`
 - **Phase 3:** `"Help me implement AdapterBlock and insert it into SAM2's image encoder. Then run Problem 3.1–3.5"`
 - **Phase 4:** `"My Phase 3 checks all pass. Help me write the full training loop with early stopping and L2 regularisation"`

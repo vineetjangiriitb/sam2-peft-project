@@ -36,11 +36,12 @@ def main() -> int:
 
     print(f"Split: {args.split}")
     print(f"Images: {len(dataset)}")
-    print(f"Classes: {dataset.class_names}")
+    print(f"Foreground classes: {dataset.foreground_class_names}")
+    print("Background label: 0")
     print(f"Image batch shape: {tuple(images.shape)}")
     print(f"Mask batch shape:  {tuple(masks.shape)}")
     print(f"Image dtype/range: {images.dtype}, {images.min().item():.3f}-{images.max().item():.3f}")
-    print(f"Mask dtype/classes in batch: {masks.dtype}, {torch.unique(masks).tolist()}")
+    print(f"Mask dtype/label ids in batch: {masks.dtype}, {torch.unique(masks).tolist()}")
 
     expected_image_shape = (args.batch_size, 3, args.image_size, args.image_size)
     expected_mask_shape = (args.batch_size, args.image_size, args.image_size)
