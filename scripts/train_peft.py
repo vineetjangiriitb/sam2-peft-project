@@ -39,8 +39,15 @@ from sam2_peft.phase3 import (
 # Cached forward: encode image once, decode once per annotation
 # ---------------------------------------------------------------------------
 
+@torch.no_grad()
 def encode_image(model, transforms, image: np.ndarray, device: torch.device):
-    """Run the full image encoder (trunk + neck + conv projections) once."""
+    """Run the full image encoder once and detach all outputs from the graph.
+
+    We use @torch.no_grad() because the encoder is frozen — no gradients flow
+    through it. This also means backbone_out tensors have no grad_fn, so
+    calling .backward() on subsequent decoder outputs works correctly across
+    multiple annotations of the same image without retain_graph=True.
+    """
     input_tensor = transforms(image).unsqueeze(0).to(device)
     return model.forward_image(input_tensor)
 
