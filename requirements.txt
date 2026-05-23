@@ -1,6 +1,7 @@
 torch>=2.5.1
 torchvision>=0.20.1
 sam2 @ git+https://github.com/facebookresearch/sam2.git
+huggingface_hub
 supervision
 pycocotools
 matplotlib

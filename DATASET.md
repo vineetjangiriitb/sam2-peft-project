@@ -7,14 +7,14 @@ Phase 1 builds the dataset required by `SAM2_PEFT_Project_Plan.md`.
 - 350-500 total humanoid robot images.
 - COCO instance segmentation format with polygon masks.
 - Split: 70% train, 15% val, 15% test.
-- Minimum 3 usable component classes.
-- Target classes:
+- Exactly 4 foreground robot-part classes:
   - `arm`
   - `leg`
   - `torso`
   - `head`
+- Semantic label `0` is background and is not counted as a project class.
 
-If one of the target classes is too rare to annotate consistently, document it before merging or dropping it.
+If one of the target classes is too rare to annotate consistently, collect or annotate more examples before training rather than silently dropping the class.
 
 ## Directory Layout
 
@@ -59,7 +59,7 @@ python scripts/import_roboflow_coco.py \
 ```
 
 5. Remove duplicates, near-duplicates, tiny images, blurry images, and images where components are not visible.
-6. Manually annotate the missing classes if the imported dataset has fewer than 350 images, fewer than 3 classes, or poor class balance.
+6. Manually annotate the missing classes if the imported dataset has fewer than 350 images, does not contain all four foreground classes, or has poor class balance.
 7. Run:
 
 ```bash
@@ -97,7 +97,7 @@ Phase 1 is not complete until:
 
 - `dataset/annotations/train.json` has at least 280 images.
 - All annotations include segmentation masks.
-- At least 3 categories are present.
+- Exactly four foreground categories are present: `arm`, `leg`, `torso`, `head`.
 - `viz/phase1_mask_alignment.png` shows masks aligned correctly in at least 4 out of 5 validation images.
 - `viz/phase1_class_balance.png` shows no class above 60% of all annotations.
 - A dataloader smoke test can load a batch without errors.

@@ -49,8 +49,16 @@ class CocoSegmentationDataset(Dataset):
         return len(self.categories) + 1
 
     @property
+    def num_foreground_classes(self) -> int:
+        return len(self.categories)
+
+    @property
     def class_names(self) -> list[str]:
         return ["background"] + [category["name"] for category in self.categories]
+
+    @property
+    def foreground_class_names(self) -> list[str]:
+        return [category["name"] for category in self.categories]
 
     def __getitem__(self, index: int) -> tuple[torch.Tensor, torch.Tensor]:
         image_id = self.image_ids[index]
@@ -83,4 +91,3 @@ class CocoSegmentationDataset(Dataset):
             semantic[instance_mask] = class_index
 
         return semantic
-

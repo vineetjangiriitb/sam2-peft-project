@@ -1,0 +1,105 @@
+loading annotations into memory...
+Done (t=0.00s)
+creating index...
+index created!
+Using device: cuda
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[1/58] q19_000020_jpg.rf.Lnn6aSDWkjzyaJdezkc4.jpg mIoU=0.146
+[2/58] q10_000008_jpg.rf.yBnbztlmUqiEXg9Wzya1.jpg mIoU=0.030
+[3/58] q13_000003_jpg.rf.YJ5r0nfBIYkFpFPxXclg.jpg mIoU=0.052
+[4/58] q09_000015_jpg.rf.G5DUDtUhRj50q85mWAID.jpg mIoU=0.558
+[5/58] q19_000018_jpg.rf.u8JqxFNjepVzEWksdPgJ.jpg mIoU=0.049
+[6/58] q13_000016_jpg.rf.1wt3hRTRaKttUxGkv4HW.jpg mIoU=0.094
+[7/58] q17_000006_jpg.rf.JmGzZgtIoCcNVGb0K3sO.jpg mIoU=0.058
+[8/58] q13_000011_jpg.rf.vizDE2x1wCJEx8J8oQWi.jpg mIoU=0.187
+[9/58] q11_000001_jpg.rf.P3dJKG4GIVcWyhiRhBHP.jpg mIoU=0.150
+[10/58] q18_000010_jpg.rf.KcCng1kz3QPaZVwQE8ve.jpg mIoU=0.652
+[11/58] q17_000003_jpg.rf.MLR6yx0Wsm9J6L02DdkT.jpg mIoU=0.125
+[12/58] q08_000015_jpg.rf.AnQWCVuuo6Tis5rEqzG4.jpg mIoU=0.054
+[13/58] q17_000007_jpg.rf.VC7yKbkcVhnlTU1XC5fr.jpg mIoU=0.319
+[14/58] q07_000008_jpg.rf.YoHB1m6kJfSzAv5pQJVE.jpg mIoU=0.113
+[15/58] q17_000011_jpg.rf.i6V7OEq6o6XaijHVv8BQ.jpg mIoU=0.131
+[16/58] q17_000009_jpg.rf.XCsnQuHlV5XiC4vX4bgA.jpg mIoU=0.128
+[17/58] q12_000010_jpg.rf.4yHF0ZXd5UeFlILc8d6g.jpg mIoU=0.101
+[18/58] q02_000016_jpg.rf.9ocxP8yZmtygeuulmWal.jpg mIoU=0.725
+[19/58] q02_000021_jpg.rf.EB3trefilsm7K3zi36TM.jpg mIoU=0.766
+[20/58] q09_000016_jpg.rf.9bgpvKXF3x4tsUS5hfHe.jpg mIoU=0.382
+[21/58] q10_000023_jpg.rf.7ShyF3kAhxMRvlwZgowg.jpg mIoU=0.103
+[22/58] q10_000024_jpg.rf.deQ34iDM4WQsFCjMaglR.jpg mIoU=0.014
+[23/58] q09_000012_jpg.rf.nZqzRTfpMCCGLV2FE1f2.jpg mIoU=0.000
+[24/58] q03_000009_jpg.rf.Kx87Ndr4nZXQbRACODvD.jpg mIoU=0.353
+[25/58] q12_000006_jpg.rf.SDBP1Bz52XtZePm2K4pl.jpg mIoU=0.046
+[26/58] q10_000021_jpg.rf.UDb74RNQrZCnAMNYIYMK.jpg mIoU=0.003
+[27/58] q03_000011_jpg.rf.xggz932O0PscUp3OXgmN.jpg mIoU=0.045
+[28/58] q18_000019_jpg.rf.DMitqKJ5fpGNRzokhfbx.jpg mIoU=0.113
+[29/58] q09_000009_jpg.rf.qx3anYmBnPLUkEcwGi7C.jpg mIoU=0.704
+[30/58] q06_000009_jpg.rf.3Z0PkpIa96ahFMwT36mD.jpg mIoU=0.157
+[31/58] q04_000011_jpg.rf.u8149d25tcaSUIqZK99r.jpg mIoU=0.652
+[32/58] q02_000022_jpg.rf.vFq6oVzK8pOJj00PMJm6.jpg mIoU=0.739
+[33/58] q18_000011_jpg.rf.ScA4CHN8T6R0n2dsh0bm.jpg mIoU=0.091
+[34/58] q19_000002_jpg.rf.nVApNKZrs6Oa3gk40SBh.jpg mIoU=0.050
+[35/58] q00_000019_jpg.rf.0DkdkY5ruisBs5m2Z881.jpg mIoU=0.545
+[36/58] q06_000005_jpg.rf.kpCERAf8Atrf6yA4VFad.jpg mIoU=0.330
+[37/58] q06_000003_jpg.rf.ne8gG5sWBO2ffdoiHLE1.jpg mIoU=0.144
+[38/58] q01_000002_jpg.rf.p0uIsuA6KXKjJec5UFUu.jpg mIoU=0.046
+[39/58] q00_000024_jpg.rf.vBjvPOUBWk18cKcKYOei.jpg mIoU=0.057
+[40/58] q03_000017_jpg.rf.0YuQopuu1bhPfSlt9YgN.jpg mIoU=0.378
+[41/58] q13_000020_jpg.rf.lAS05WZyVZJuEH1Ladfm.jpg mIoU=0.185
+[42/58] q14_000002_jpg.rf.mpOLJuFSthtJKhqyDnjH.jpg mIoU=0.004
+[43/58] q05_000007_jpg.rf.OQFA8hOhDBFiSkDXUdEZ.jpg mIoU=0.179
+[44/58] q15_000002_jpg.rf.fYdGYaKQ6js4aMXDkA1I.jpg mIoU=0.316
+[45/58] q14_000006_jpg.rf.s1cRjaL0a3GbZhYl5wVw.jpg mIoU=0.150
+[46/58] q15_000025_jpg.rf.5KcZOJyKEeBSNrcrVWTj.jpg mIoU=0.327
+[47/58] q15_000023_jpg.rf.Wc5rUg7iPkViFExSbQin.jpg mIoU=0.273
+[48/58] q15_000009_jpg.rf.MryT83xu5uD7dIA1qMSc.jpg mIoU=0.046
+[49/58] q01_000017_jpg.rf.3fSNld4d19A4HD4JtPGL.jpg mIoU=0.057
+[50/58] q15_000013_jpg.rf.nZ4cYhGgyC1sSjn9ifM6.jpg mIoU=0.141
+[51/58] q15_000005_jpg.rf.gkSFC0h75qzrlnTd27Fe.jpg mIoU=0.494
+[52/58] q02_000011_jpg.rf.UDeqLeLsIW04jjTKJAKJ.jpg mIoU=0.417
+[53/58] q01_000011_jpg.rf.FTSugCM3cue5DBFRPYLs.jpg mIoU=0.061
+[54/58] q02_000005_jpg.rf.MEDAQfKAkPGVARuIuptI.jpg mIoU=0.267
+[55/58] q01_000024_jpg.rf.ZnbSmReqXJdR8OhXf18G.jpg mIoU=0.111
+[56/58] q01_000009_jpg.rf.bjgesJ0bdxsgf0JjgQTy.jpg mIoU=0.093
+[57/58] q01_000008_jpg.rf.YX6yCOltWeXm7foDYwC3.jpg mIoU=0.076
+[58/58] q01_000006_jpg.rf.qB7lvBjrPIne7M1eo8AY.jpg mIoU=0.048
+{
+  "model_id": "facebook/sam2.1-hiera-large",
+  "device": "cuda",
+  "split": "test",
+  "images": 58,
+  "annotations": 333,
+  "foreground_class_names": [
+    "arm",
+    "leg",
+    "torso",
+    "head"
+  ],
+  "semantic_labels": {
+    "0": "background",
+    "1": "arm",
+    "2": "leg",
+    "3": "torso",
+    "4": "head"
+  },
+  "mean_miou": 0.2178034019288507,
+  "mean_latency_ms": 236.8234081659466,
+  "p95_latency_ms": 499.03584364801645,
+  "mean_annotation_prompt_latency_ms": 31.56428428942914,
+  "p95_annotation_prompt_latency_ms": 149.20935174450278,
+  "per_class_iou": {
+    "arm": 0.14472603446980756,
+    "head": 0.22550119375955785,
+    "leg": 0.1920250337511719,
+    "torso": 0.3241467426419656
+  },
+  "annotation_counts": {
+    "arm": 112,
+    "leg": 92,
+    "head": 68,
+    "torso": 61
+  }
+}
+Saved outputs/phase2_zero_shot_sam2/results.csv
+Saved outputs/phase2_zero_shot_sam2/summary.json
+Saved viz/phase2_failure_modes.png
+Saved viz/phase2_iou_distribution.png

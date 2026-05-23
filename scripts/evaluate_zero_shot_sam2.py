@@ -46,7 +46,7 @@ def load_predictor(model_id: str, device: str):
         raise SystemExit(
             "SAM2 is not installed. Install it with:\n"
             "  pip install git+https://github.com/facebookresearch/sam2.git\n"
-            "or run this script in the Phase 0 Colab environment."
+            "or run this script in the Phase 0 RunPod environment."
         ) from exc
     return SAM2ImagePredictor.from_pretrained(model_id, device=device)
 
@@ -274,7 +274,8 @@ def main() -> int:
         "split": args.split,
         "images": len(image_records),
         "annotations": len(csv_rows),
-        "class_names": class_names,
+        "foreground_class_names": class_names[1:],
+        "semantic_labels": {"0": "background", **{str(index): name for index, name in enumerate(class_names[1:], start=1)}},
         "mean_miou": statistics.mean(image_mious) if image_mious else None,
         "mean_latency_ms": statistics.mean(image_latencies) if image_latencies else None,
         "p95_latency_ms": p95(image_latencies),

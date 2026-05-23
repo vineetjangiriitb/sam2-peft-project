@@ -1,0 +1,48 @@
+loading annotations into memory...
+Done (t=0.00s)
+creating index...
+index created!
+Using device: cuda
+[1/2] q19_000020_jpg.rf.Lnn6aSDWkjzyaJdezkc4.jpg mIoU=0.146
+[2/2] q10_000008_jpg.rf.yBnbztlmUqiEXg9Wzya1.jpg mIoU=0.030
+{
+  "model_id": "facebook/sam2.1-hiera-large",
+  "device": "cuda",
+  "split": "test",
+  "images": 2,
+  "annotations": 10,
+  "foreground_class_names": [
+    "arm",
+    "leg",
+    "torso",
+    "head"
+  ],
+  "semantic_labels": {
+    "0": "background",
+    "1": "arm",
+    "2": "leg",
+    "3": "torso",
+    "4": "head"
+  },
+  "mean_miou": 0.08758445302370872,
+  "mean_latency_ms": 361.3563079852611,
+  "p95_latency_ms": 496.92593375220895,
+  "mean_annotation_prompt_latency_ms": 32.11919851601124,
+  "p95_annotation_prompt_latency_ms": 148.35282694548368,
+  "per_class_iou": {
+    "arm": 2.312472900708195e-05,
+    "head": 0.05127016963177493,
+    "leg": 0.2911042576200585,
+    "torso": 0.007940260113994416
+  },
+  "annotation_counts": {
+    "arm": 2,
+    "leg": 6,
+    "head": 1,
+    "torso": 1
+  }
+}
+Saved outputs/phase2_zero_shot_sam2_smoke/results.csv
+Saved outputs/phase2_zero_shot_sam2_smoke/summary.json
+Saved viz/phase2_smoke/phase2_failure_modes.png
+Saved viz/phase2_smoke/phase2_iou_distribution.png
