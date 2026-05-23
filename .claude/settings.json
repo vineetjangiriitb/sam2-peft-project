@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la *)",
+      "Bash(ls -la)",
+      "Bash(grep -n *)",
+      "Bash(grep -r *)",
+      "Bash(grep -B *)",
+      "Bash(du -sh *)",
+      "Bash(find /Users/vineetjangir *)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git branch *)",
+      "Bash(docker ps *)",
+      "Bash(df -h)"
+    ]
+  }
+}
